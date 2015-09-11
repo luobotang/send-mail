@@ -1,0 +1,19 @@
+{
+  "name": "send-mail",
+  "version": "0.1.0",
+  "description": "Send e-mail by node.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luobotang/send-mail.git"
+  },
+  "author": "luobotang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/luobotang/send-mail/issues"
+  },
+  "homepage": "https://github.com/luobotang/send-mail#readme"
+}
