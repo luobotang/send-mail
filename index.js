@@ -1,6 +1,7 @@
 var net = require('net')
 
 var CMD_MESSAGE = '<message>'
+var CMD_RCPT_TO = 'rcpt to:'
 var END_LINE = '\r\n'
 
 /*
@@ -12,14 +13,16 @@ function sendMail(options) {
 	var cmds = [
 		'HELO ' + options.host,
 
+		// auth
 		'auth login',
 		new Buffer(options.username).toString('base64'),
 		new Buffer(options.password).toString('base64'),
 
-		// message
+		// from to
 		'mail from:' + options.username,
-		'rcpt to:' + options.to,
+		CMD_RCPT_TO + options.to,
 
+		// message
 		'data',
 		CMD_MESSAGE,
 
@@ -33,6 +36,8 @@ function sendMail(options) {
 		options.body,
 		'.'
 	]
+
+	prepairRcpt(cmds)
 
 	var client = net.connect({
 		host: options.host,
@@ -72,6 +77,35 @@ function sendMail(options) {
 	client.on('end', function () {
 		console.log('send mail finish')
 	})
+}
+
+/*
+ * prepair rcpt cmd, check if have multiple receiptor
+ * @example
+ *   cmd:
+ *     rcpt to:a <a@example.com>; b <b@example.com>
+ *   will be replaced by two cmds:
+ *     rcpt to:a <a@example.com>
+ *     rcpt to:b <b@example.com>
+ */
+function prepairRcpt(cmds) {
+	var idx
+	var rcpts
+
+	for (var i = 0, l = cmds.length; i < l; i++) {
+		if (cmds[i].indexOf(CMD_RCPT_TO) > -1) {
+			idx = i
+			rcpts = cmds[i]
+			break
+		}
+	}
+
+	if (rcpts) {
+		rcpts = rcpts.substr(CMD_RCPT_TO.length).split(/;\s*/).map(function (rcpt) {
+			return CMD_RCPT_TO + rcpt
+		})
+		cmds.splice.apply(cmds, [idx, 1].concat(rcpts))
+	}
 }
 
 module.exports = sendMail
