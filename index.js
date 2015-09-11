@@ -85,8 +85,8 @@ function sendMail(options) {
  *   cmd:
  *     rcpt to:a <a@example.com>; b <b@example.com>
  *   will be replaced by two cmds:
- *     rcpt to:a <a@example.com>
- *     rcpt to:b <b@example.com>
+ *     rcpt to:a@example.com
+ *     rcpt to:b@example.com
  */
 function prepairRcpt(cmds) {
 	var idx
@@ -102,7 +102,9 @@ function prepairRcpt(cmds) {
 
 	if (rcpts) {
 		rcpts = rcpts.substr(CMD_RCPT_TO.length).split(/;\s*/).map(function (rcpt) {
-			return CMD_RCPT_TO + rcpt
+			var address = /.*\<(.+@.+)\>.*/.exec(rcpt)
+			address = address && address[1] || rcpt
+			return CMD_RCPT_TO + address
 		})
 		cmds.splice.apply(cmds, [idx, 1].concat(rcpts))
 	}
